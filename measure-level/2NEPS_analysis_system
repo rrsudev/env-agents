@@ -1,0 +1,65 @@
+import pandas as pd
+import numpy as np
+
+# CONFIG
+GROUND_TRUTH_CSV = "apr8analysispipeline/apr8cleangroundtruth.csv"
+# PREDICTED_CSV = "apr8analysispipeline/processed_americanvoices_responses.csv"
+# PREDICTED_CSV = "apr8analysispipeline/processed_environment_responses.csv"
+PREDICTED_CSV = "apr8analysispipeline/processed_demographic_responses.csv"
+OUTPUT_CSV = "apr8analysispipeline/aggregated_outputs/nep_output.csv"
+
+# likert mapping for 5-point scale
+likert_map_5pt = {
+    "Strongly disagree": 1,
+    "Disagree": 2,
+    "Unsure": 3,
+    "Agree": 4,
+    "Strongly agree": 5
+}
+
+# reverse code function and column mapping
+def reverse_code(series, max_value):
+    return max_value + 1 - series
+
+nep_cols = [f"NEPS_{i}" for i in range(1, 16)]
+reverse_nep = ["NEPS_2", "NEPS_6", "NEPS_12"]
+
+# load data
+df_truth = pd.read_csv(GROUND_TRUTH_CSV)
+df_pred = pd.read_csv(PREDICTED_CSV)
+
+# standardize email keys
+df_truth["Email"] = df_truth["Email"].astype(str).str.lower().str.strip()
+df_pred["Email"] = df_pred["Email"].astype(str).str.lower().str.strip()
+
+# apply mapping + reverse coding
+for col in nep_cols:
+    if col in df_truth.columns:
+        df_truth[col] = df_truth[col].map(likert_map_5pt).astype(float)
+    if col in df_pred.columns:
+        df_pred[col] = df_pred[col].map(likert_map_5pt).astype(float)
+
+for col in reverse_nep:
+    if col in df_truth.columns:
+        df_truth[col] = reverse_code(df_truth[col], 5)
+    if col in df_pred.columns:
+        df_pred[col] = reverse_code(df_pred[col], 5)
+
+# composite 
+df_truth["NEP_Composite_Truth"] = df_truth[nep_cols].mean(axis=1)
+df_pred["NEP_Composite_Pred"] = df_pred[nep_cols].mean(axis=1)
+
+# normalize
+df_truth["NEP_Composite_Truth"] /= 5
+df_pred["NEP_Composite_Pred"] /= 5
+
+# save as csv
+merged = pd.merge(
+    df_truth[["Email", "NEP_Composite_Truth"]],
+    df_pred[["Email", "NEP_Composite_Pred"]],
+    on="Email",
+    how="inner"
+)
+
+merged.to_csv(OUTPUT_CSV, index=False)
+print(f"\n✅ Saved normalized NEP composites to: {OUTPUT_CSV}")

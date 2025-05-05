@@ -1,0 +1,80 @@
+import pandas as pd
+import numpy as np
+
+# CONFIG
+GROUND_TRUTH_CSV = "apr8analysispipeline/apr8cleangroundtruth.csv"
+# PREDICTED_CSV = "apr8analysispipeline/processed_americanvoices_responses.csv"
+# PREDICTED_CSV = "apr8analysispipeline/processed_environment_responses.csv"
+PREDICTED_CSV = "apr8analysispipeline/processed_demographic_responses.csv"
+OUTPUT_PATH = "apr8analysispipeline/aggregated_outputs/mfq_output.csv"
+
+# MFQ columns based on subcategory chart
+mfq_cols = [f"MFQ_1_{i}" for i in range(1, 17)] + [f"MFQ_2_{i}" for i in range(1, 17)]
+mfq_foundations = {
+    "Harm_Care":   [1, 7, 12, 17, 23, 28],
+    "Fairness":    [2, 8, 13, 18, 24, 29],
+    "Loyalty":     [3, 9, 14, 19, 25, 30],
+    "Authority":   [4, 10, 15, 20, 26, 31],
+    "Sanctity":    [5, 11, 16, 21, 27, 32],
+}
+
+# mappings to scale
+# takes into account potentially misgenerated items
+response_map = {
+    '(0) Not at all relevant (This consideration has nothing to do with my judgments of right and wrong.)': 0,
+    '(1) Not very relevant': 1,
+    '(2) Slightly relevant': 2,
+    '(3) Somewhat relevant': 3,
+    '(4) Very relevant': 4,
+    '(5) Extremely relevant (This is one of the most important factors when I judge right and wrong.)': 5,
+    '0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5,
+    0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5
+}
+
+# load and preprocess
+df_truth = pd.read_csv(GROUND_TRUTH_CSV)
+df_pred = pd.read_csv(PREDICTED_CSV)
+df_truth["Email"] = df_truth["Email"].astype(str).str.lower().str.strip()
+df_pred["Email"] = df_pred["Email"].astype(str).str.lower().str.strip()
+
+# response mapping
+df_truth[mfq_cols] = df_truth[mfq_cols].applymap(response_map.get)
+df_pred[mfq_cols] = df_pred[mfq_cols].applymap(response_map.get)
+
+# compute mfq scores
+def compute_foundation_scores(df):
+    for name, qnums in mfq_foundations.items():
+        subcols = []
+        for q in qnums:
+            subcols.append(f"MFQ_1_{q}" if q <= 16 else f"MFQ_2_{q - 16}")
+        df[f"MFQ_{name}"] = df[subcols].mean(axis=1)
+    return df
+
+df_truth = compute_foundation_scores(df_truth)
+df_pred = compute_foundation_scores(df_pred)
+foundation_vars = [f"MFQ_{f}" for f in mfq_foundations]
+
+merged = pd.merge(
+    df_truth[["Email"] + foundation_vars],
+    df_pred[["Email"] + foundation_vars],
+    on="Email",
+    suffixes=("_truth", "_pred")
+).dropna()
+
+# normalize
+for col in merged.columns:
+    if col != "Email":
+        merged[col] = merged[col] / 5
+
+# calculate overall mfq score
+merged["MFQ_overall_truth"] = merged[[f"{f}_truth" for f in foundation_vars]].mean(axis=1)
+merged["MFQ_overall_pred"] = merged[[f"{f}_pred" for f in foundation_vars]].mean(axis=1)
+
+# save final output columns as csv
+final_cols = ["Email"] + \
+    [f"{f}_truth" for f in foundation_vars] + \
+    [f"{f}_pred" for f in foundation_vars] + \
+    ["MFQ_overall_truth", "MFQ_overall_pred"]
+
+merged[final_cols].to_csv(OUTPUT_PATH, index=False)
+print(f"\n✅ Saved normalized MFQ results to: {OUTPUT_PATH}")

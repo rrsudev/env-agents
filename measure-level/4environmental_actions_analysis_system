@@ -1,0 +1,52 @@
+import pandas as pd
+import numpy as np
+
+# CONFIG
+GROUND_TRUTH_CSV = "apr8analysispipeline/apr8cleangroundtruth.csv"
+PREDICTED_CSV = "apr8analysispipeline/processed_americanvoices_responses.csv"
+# PREDICTED_CSV = "apr8analysispipeline/processed_environment_responses.csv"
+# PREDICTED_CSV = "apr8analysispipeline/processed_demographic_responses.csv"
+OUTPUT_PATH = "apr8analysispipeline/FIXED_ENVACTIONS/AVP_envactions_output.csv"
+
+# column mapping
+env_cols = [f"ENV_ACTIONS_{i}" for i in range(1, 18)]
+
+# likert mapping for 7-point scale (+ override for "already do this")
+likert_map_7pt = {
+    "Very unlikely": 1,
+    "Unlikely": 2,
+    "Somewhat unlikely": 3,
+    "Neutral": 4,
+    "Somewhat likely": 5,
+    "Likely": 6,
+    "Very likely": 7,
+    "I already do this": 7
+}
+
+# load and preprocess
+df_truth = pd.read_csv(GROUND_TRUTH_CSV)
+df_pred = pd.read_csv(PREDICTED_CSV)
+df_truth["Email"] = df_truth["Email"].astype(str).str.lower().str.strip()
+df_pred["Email"] = df_pred["Email"].astype(str).str.lower().str.strip()
+
+# map columns 
+for col in env_cols:
+    df_truth[col] = df_truth[col].map(likert_map_7pt).astype(float)
+    df_pred[col] = df_pred[col].map(likert_map_7pt).astype(float)
+
+# normalize
+for col in env_cols:
+    df_truth[col] = df_truth[col] / 7
+    df_pred[col] = df_pred[col] / 7
+
+merged = pd.merge(
+    df_truth[["Email"] + env_cols],
+    df_pred[["Email"] + env_cols],
+    on="Email",
+    suffixes=("_truth", "_pred"),
+    how="inner"
+)
+
+# save as CSV
+merged.to_csv(OUTPUT_PATH, index=False)
+print(f"\n✅ Saved item-level normalized ENV_ACTIONS to: {OUTPUT_PATH}")
