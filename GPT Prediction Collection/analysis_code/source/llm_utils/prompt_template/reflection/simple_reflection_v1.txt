@@ -1,0 +1,11 @@
+Variables: 
+
+Note: variation of version 5
+
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>!
+
+===
+
+!<INPUT 1>!
+(start with one sentence summary in third person of what your expertises are as you review the interview content... e.g., "If a demopgrapher viewed this interview content, they would make the following reflections...")

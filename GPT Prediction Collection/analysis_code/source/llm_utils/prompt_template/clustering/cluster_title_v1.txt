@@ -1,0 +1,6 @@
+Variables: 
+!<INPUT 0>!: Curr convo
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>!
+
+Give a title to the title above. (Output a single title in txt. Only the title)
