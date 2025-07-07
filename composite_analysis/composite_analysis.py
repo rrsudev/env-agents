@@ -207,22 +207,28 @@ measures = {
             {"pred": "Proximity_Composite_Pred", "w2": "Proximity_Composite_W2", "true": "Proximity_Composite_W1"}
         ]
     },
-    # "risk_aversion_output.csv": {
-    #     "cat": "ind",
-    #     "cols": [
-    #         {"pred": "Switch_Point_Pred", "w2": , "true": "Switch_Point_W1"}
-    #     ]
-    # },
-    # "sciencerank_normalized_output.csv": {
-    #     "cat": "ind",
-    #     "cols": [
-    #         {"pred": "Science_Rank_Overall_Pred", "w2": , "true": "Science_Rank_Overall_W1"}
-    #     ]
-    # },
+    "risk_aversion_output.csv": {
+        "cat": "ind",
+        "cols": [
+            {"pred": "RA_Composite_Pred", "w2": "RA_Composite_W2", "true": "RA_Composite_W1"}
+        ]
+    },
+    "trust_composite_output.csv": {
+        "cat": "ind",
+        "cols": [
+            {"pred": "Trust_Composite_Pred", "w2": "Trust_Composite_W2", "true": "Trust_Composite_W1"}
+        ]
+    },
     "sdo_output.csv": {
         "cat": "ind",
         "cols": [
             {"pred": "SDO_Composite_Pred", "w2":  "SDO_Composite_W2", "true": "SDO_Composite_W1"}
+        ]
+    },
+    "mes_composite_output.csv": {
+        "cat": "ind",
+        "cols": [
+            {"pred": "MES_Composite_Pred", "w2":  "MES_Composite_W2", "true": "MES_Composite_W1"}
         ]
     },
     # "svi_output.csv": {
@@ -295,7 +301,7 @@ measures = {
 # rename emotion_direct_match_rate to envemotions
 # rename svi rates
 
-directories = ["AVPaggregated_outputs", "DEMOGRAPHICaggregated_outputs", "ENVIRONMENTALaggregated_outputs", "ALLCONDITIONSaggregated_outputs"]
+directories = ["AVP_waves", "DEMOGRAPHIC_waves", "ENVIRONMENTAL_waves", "ALLCONDITIONS_waves"]
 
 def main():
     results = {}
@@ -422,9 +428,10 @@ def person_analysis():
                 trues = values['true']
                 w2s = values['w2']
 
-                if len(preds) < 2:
+                if len(preds) < 2 or len(trues) < 2 or len(w2s) < 2:
+                    continue
                     # Need at least 2 points for correlation
-                    corr, pval = (float('nan'), float('nan'))
+                    # corr, pval = (float('nan'), float('nan'))
                 else:
                     corr, pval = pearsonr(preds, trues)
                     w2_corr, w2_pval = pearsonr(w2s, trues)
@@ -498,6 +505,6 @@ def person_analysis():
 
 
 if __name__ == '__main__':
-    #person_analysis()
-    main()
+    person_analysis()
+    #main()
     #compile_all_composites_one_csv()
