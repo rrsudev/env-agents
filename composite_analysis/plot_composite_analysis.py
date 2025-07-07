@@ -10,7 +10,8 @@ def plot_from_person_level_data():
     df = pd.read_csv('composite_outcomes_person_level_correlations_pivoted.csv')
 
     # Define inputs and categories
-    inputs = ['ENVIRONMENTAL', 'AVP', 'DEMOGRAPHIC']
+    inputs = ['ALLCONDITIONS', 'ENVIRONMENTAL', 'AVP', 'DEMOGRAPHIC']
+    n_inputs = len(inputs)
     # categories = ['env', 'soc', 'ind']
     # category_labels = ['Environmental', 'Social', 'Individual']
     categories = ['env', 'ind']
@@ -18,6 +19,7 @@ def plot_from_person_level_data():
 
     # Set colors for inputs
     colors = {
+        'ALLCONDITIONS': 'grey',
         'ENVIRONMENTAL': 'skyblue',
         'AVP': 'salmon',
         'DEMOGRAPHIC': 'lightgreen'
@@ -54,6 +56,7 @@ def plot_from_person_level_data():
 
     # Offsets for each input within a category
     offsets = {
+        'ALLCONDITIONS': -2*bar_width,
         'ENVIRONMENTAL': -bar_width,
         'AVP': 0,
         'DEMOGRAPHIC': bar_width
@@ -61,8 +64,8 @@ def plot_from_person_level_data():
 
     # Plot each set of bars
     for i, input_type in enumerate(inputs):
-        means = bar_means[i::3]
-        errors = bar_errors[i::3]
+        means = bar_means[i::n_inputs]
+        errors = bar_errors[i::n_inputs]
         ax.bar(index + offsets[input_type], means, bar_width,
                label=input_type, color=colors[input_type], yerr=errors, capsize=5)
 
@@ -110,43 +113,151 @@ def plot_from_measures_level():
     #         {"pred": "Science_Rank_Overall_Pred", "true": "Science_Rank_Overall_Truth"}]},
     #     "sdo_output.csv": {"cat": "soc", "cols": [{"pred": "SDO_Composite_Pred", "true": "SDO_Composite_Truth"}]}
     # }
+
+    # Non-normalized measures
+    # measures = {
+    #     "adaptation_mitigation_output.csv": {"cat": "env", "cols": [
+    #         {"pred": "Overall_Composite_Pred", "true": "Overall_Composite_Truth"}]},
+    #     "cns_output.csv": {"cat": "env",
+    #                        "cols": [{"pred": "CNS_Composite_Pred_Norm", "true": "CNS_Composite_Truth_Norm"}]},
+    #     "ecdc_output.csv": {"cat": "env", "cols": [{"pred": "ECDC_Collect_Pred", "true": "ECDC_Collect_Truth"},
+    #                                                {"pred": "ECDC_Indiv_Pred", "true": "ECDC_Indiv_Truth"}]},
+    #     "efficacy_composite_match.csv": {"cat": "env", "cols": [{"pred": "Eff_Indiv_pred", "true": "Eff_Indiv_truth"},
+    #                                                             {"pred": "Eff_Collective_pred",
+    #                                                              "true": "Eff_Collective_truth"}]},
+    #     "envactions_output.csv": {"cat": "env", "cols": [
+    #         {"pred": "ENV_Actions_Composite_Pred", "true": "ENV_Actions_Composite_Truth"}]},
+    #     "gse_individual_level_summary.csv": {"cat": "ind",
+    #                                          "cols": [{"pred": "GSE_Composite_Pred", "true": "GSE_Composite_Truth"}]},
+    #     "gsjs_output.csv": {"cat": "ind", "cols": [{"pred": "GSJS_Composite_Pred", "true": "GSJS_Composite_Truth"}]},
+    #     "iri_output.csv": {"cat": "ind", "cols": [{"pred": "IRI_PT_pred", "true": "IRI_PT_truth"},
+    #                                               {"pred": "IRI_FS_pred", "true": "IRI_FS_truth"},
+    #                                               {"pred": "IRI_EC_pred", "true": "IRI_EC_truth"},
+    #                                               {"pred": "IRI_PD_pred", "true": "IRI_PD_truth"}]},
+    #     "mfq_output.csv": {"cat": "ind", "cols": [{"pred": "MFQ_overall_pred", "true": "MFQ_overall_truth"}]},
+    #     "nep_output.csv": {"cat": "env", "cols": [{"pred": "NEP_Composite_Pred", "true": "NEP_Composite_Truth"}]},
+    #     "nfc_output.csv": {"cat": "ind", "cols": [{"pred": "NFC_Composite_Pred", "true": "NFC_Composite_Truth"}]},
+    #     "proximity_output.csv": {"cat": "env",
+    #                              "cols": [{"pred": "Proximity_Composite_Pred", "true": "Proximity_Composite_Truth"}]},
+    #     "risk_aversion_output.csv": {"cat": "ind",
+    #                                  "cols": [{"pred": "Switch_Point_Pred", "true": "Switch_Point_Truth"}]},
+    #     "sciencerank_normalized_output.csv": {"cat": "ind", "cols": [
+    #         {"pred": "Science_Rank_Overall_Pred", "true": "Science_Rank_Overall_Truth"}]},
+    #     "sdo_output.csv": {"cat": "ind", "cols": [{"pred": "SDO_Composite_Pred", "true": "SDO_Composite_Truth"}]}
+    # }
+    # --------------------------------------------------------
+
     measures = {
-        "adaptation_mitigation_output.csv": {"cat": "env", "cols": [
-            {"pred": "Overall_Composite_Pred", "true": "Overall_Composite_Truth"}]},
-        "cns_output.csv": {"cat": "env",
-                           "cols": [{"pred": "CNS_Composite_Pred_Norm", "true": "CNS_Composite_Truth_Norm"}]},
-        "ecdc_output.csv": {"cat": "env", "cols": [{"pred": "ECDC_Collect_Pred", "true": "ECDC_Collect_Truth"},
-                                                   {"pred": "ECDC_Indiv_Pred", "true": "ECDC_Indiv_Truth"}]},
-        "efficacy_composite_match.csv": {"cat": "env", "cols": [{"pred": "Eff_Indiv_pred", "true": "Eff_Indiv_truth"},
-                                                                {"pred": "Eff_Collective_pred",
-                                                                 "true": "Eff_Collective_truth"}]},
-        "envactions_output.csv": {"cat": "env", "cols": [
-            {"pred": "ENV_Actions_Composite_Pred", "true": "ENV_Actions_Composite_Truth"}]},
-        "gse_individual_level_summary.csv": {"cat": "ind",
-                                             "cols": [{"pred": "GSE_Composite_Pred", "true": "GSE_Composite_Truth"}]},
-        "gsjs_output.csv": {"cat": "ind", "cols": [{"pred": "GSJS_Composite_Pred", "true": "GSJS_Composite_Truth"}]},
-        "iri_output.csv": {"cat": "ind", "cols": [{"pred": "IRI_PT_pred", "true": "IRI_PT_truth"},
-                                                  {"pred": "IRI_FS_pred", "true": "IRI_FS_truth"},
-                                                  {"pred": "IRI_EC_pred", "true": "IRI_EC_truth"},
-                                                  {"pred": "IRI_PD_pred", "true": "IRI_PD_truth"}]},
-        "mfq_output.csv": {"cat": "ind", "cols": [{"pred": "MFQ_overall_pred", "true": "MFQ_overall_truth"}]},
-        "nep_output.csv": {"cat": "env", "cols": [{"pred": "NEP_Composite_Pred", "true": "NEP_Composite_Truth"}]},
-        "nfc_output.csv": {"cat": "ind", "cols": [{"pred": "NFC_Composite_Pred", "true": "NFC_Composite_Truth"}]},
-        "proximity_output.csv": {"cat": "env",
-                                 "cols": [{"pred": "Proximity_Composite_Pred", "true": "Proximity_Composite_Truth"}]},
-        "risk_aversion_output.csv": {"cat": "ind",
-                                     "cols": [{"pred": "Switch_Point_Pred", "true": "Switch_Point_Truth"}]},
-        "sciencerank_normalized_output.csv": {"cat": "ind", "cols": [
-            {"pred": "Science_Rank_Overall_Pred", "true": "Science_Rank_Overall_Truth"}]},
-        "sdo_output.csv": {"cat": "ind", "cols": [{"pred": "SDO_Composite_Pred", "true": "SDO_Composite_Truth"}]}
+        "adaptation_mitigation_output.csv": {
+            "cat": "env",
+            "cols": [
+                {"pred": "Overall_Pred", "w2": "Truth_Overall_W2", "true": "Truth_Overall_W1"}
+            ]
+        },
+        "cns_output.csv": {
+            "cat": "env",
+            "cols": [
+                {"pred": "CNS_Composite_Pred", "w2": "CNS_Composite_W2", "true": "CNS_Composite_W1"}
+            ]
+        },
+        # "ecdc_output.csv": {
+        #     "cat": "env",
+        #     "cols": [
+        #         {"pred": "Collective_Pred", "w2": "Collective_W2", "true": "Collective_W1"},
+        #         {"pred": "Indiv_Pred", "w2": "Indiv_W2", "true": "Indiv_W1"}
+        #     ]
+        # },
+        # "envefficacy_match.csv": {
+        #         #     "cat": "env",
+        #         #     "cols": [
+        #         #         {"pred": "Eff_Indiv_Pred", "w2": "Eff_Indiv_W2", "true": "Eff_Indiv_W1"},
+        #         #         {"pred": "Eff_Collective_Pred", "w2": "Eff_Collective_W2", "true": "Eff_Collective_W1"}
+        #         #     ]
+        #         # },
+        # "envactions_output.csv": {
+        #     "cat": "env",
+        #     "cols": [{"pred": "ENV_Actions_Composite_Pred", "true": "ENV_Actions_Composite_Truth"}]
+        # }, # not a scale or sum
+        # "envemotions_output.csv": {
+        #     "cat": "env",
+        #     "cols": [{"pred": , "true": }]
+        # }, # This one is just match rate on a list of emotions
+        "gses_output.csv": {
+            "cat": "ind",
+            "cols": [
+                {"pred": "GSE_Composite_Pred", "w2": "GSE_Composite_W2", "true": "GSE_Composite_W1"}
+            ]
+        },
+        "gsjs_output.csv": {
+            "cat": "ind",
+            "cols": [
+                {"pred": "GSJS_Composite_Pred", "w2": "GSJS_Composite_W2", "true": "GSJS_Composite_W1"}
+            ]
+        },
+        "iri_output.csv": {
+            "cat": "ind",
+            "cols": [
+                {"pred": "IRI_PT_Pred", "w2": "IRI_PT_W2", "true": "IRI_PT_W1"},
+                {"pred": "IRI_FS_Pred", "w2": "IRI_FS_W2", "true": "IRI_FS_W1"},
+                {"pred": "IRI_EC_Pred", "w2": "IRI_EC_W2", "true": "IRI_EC_W1"},
+                {"pred": "IRI_PD_Pred", "w2": "IRI_PD_W2", "true": "IRI_PD_W1"}
+            ]
+        },
+        "mfq_output.csv": {
+            "cat": "ind",
+            "cols": [
+                {"pred": "MFQ_overall_Pred", "w2": "MFQ_overall_W2", "true": "MFQ_overall_W1"}
+            ]
+        },
+        "nep_output.csv": {
+            "cat": "env",
+            "cols": [
+                {"pred": "NEP_Composite_Pred", "w2": "NEP_Composite_W2", "true": "NEP_Composite_W1"}
+            ]
+        },
+        "nfc_output.csv": {
+            "cat": "ind",
+            "cols": [
+                {"pred": "NFC_Composite_Pred", "w2": "NFC_Composite_W2", "true": "NFC_Composite_W1"}
+            ]
+        },
+        "proximity_output.csv": {
+            "cat": "env",
+            "cols": [
+                {"pred": "Proximity_Composite_Pred", "w2": "Proximity_Composite_W2", "true": "Proximity_Composite_W1"}
+            ]
+        },
+        # "risk_aversion_output.csv": {
+        #     "cat": "ind",
+        #     "cols": [
+        #         {"pred": "Switch_Point_Pred", "w2": , "true": "Switch_Point_W1"}
+        #     ]
+        # },
+        # "sciencerank_normalized_output.csv": {
+        #     "cat": "ind",
+        #     "cols": [
+        #         {"pred": "Science_Rank_Overall_Pred", "w2": , "true": "Science_Rank_Overall_W1"}
+        #     ]
+        # },
+        "sdo_output.csv": {
+            "cat": "ind",
+            "cols": [
+                {"pred": "SDO_Composite_Pred", "w2": "SDO_Composite_W2", "true": "SDO_Composite_W1"}
+            ]
+        },
+        # "svi_output.csv": {
+        #     "cat": "ind",
+        #     "cols": [{"pred": , "true": }]
+        # } # separate not composite
     }
 
     # Read the CSV
     df = pd.read_csv('composite_outcomes_correlations.csv', index_col=0)
 
     # Inputs and colors
-    inputs = ['ENVIRONMENTAL', 'AVP', 'DEMOGRAPHIC']
+    inputs = ['ALLCONDITIONS', 'ENVIRONMENTAL', 'AVP', 'DEMOGRAPHIC']
     input_colors = {
+        'ALLCONDITIONS': 'grey',
         'ENVIRONMENTAL': 'skyblue',
         'AVP': 'salmon',
         'DEMOGRAPHIC': 'lightgreen'
