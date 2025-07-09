@@ -11,11 +11,17 @@ def plot_from_person_level_data():
 
     # Define inputs and categories
     inputs = ['ALLCONDITIONS', 'ENVIRONMENTAL', 'AVP', 'DEMOGRAPHIC']
+    label_map = {
+        'ALLCONDITIONS': 'Combined',
+        'AVP': 'American Voices Project',
+        'ENVIRONMENTAL': 'Climate',
+        'DEMOGRAPHIC': 'Demographic'
+    }
     n_inputs = len(inputs)
     # categories = ['env', 'soc', 'ind']
     # category_labels = ['Environmental', 'Social', 'Individual']
     categories = ['env', 'ind']
-    category_labels = ['Environmental', 'Individual and Social']
+    category_labels = ['Climate', 'Individual Difference']
 
     # Set colors for inputs
     colors = {
@@ -31,7 +37,7 @@ def plot_from_person_level_data():
 
     for category in categories:
         for input_type in inputs:
-            column_name = f'{input_type}aggregated_outputs_{category}_correlation'
+            column_name = f'{input_type}_waves_{category}_correlation'
             if column_name in df.columns:
                 values = df[column_name].dropna()
                 mean = values.mean()
@@ -67,15 +73,16 @@ def plot_from_person_level_data():
         means = bar_means[i::n_inputs]
         errors = bar_errors[i::n_inputs]
         ax.bar(index + offsets[input_type], means, bar_width,
-               label=input_type, color=colors[input_type], yerr=errors, capsize=5)
+            label=label_map.get(input_type, input_type),
+            color=colors[input_type], yerr=errors, capsize=5)
 
     # Set labels and title
-    ax.set_xlabel('Question Categories')
+    ax.set_xlabel('Measure Categories')
     ax.set_ylabel('Average Correlation')
     ax.set_title('Average Correlation by Input Type and Category')
     ax.set_xticks(index)
     ax.set_xticklabels(category_labels)
-    ax.legend(title='Input Type')
+    ax.legend(title='Agent Type')
 
     plt.tight_layout()
     plt.show()
@@ -256,6 +263,12 @@ def plot_from_measures_level():
 
     # Inputs and colors
     inputs = ['ALLCONDITIONS', 'ENVIRONMENTAL', 'AVP', 'DEMOGRAPHIC']
+    label_map = {
+        'ALLCONDITIONS': 'Combined',
+        'AVP': 'American Voices Project',
+        'ENVIRONMENTAL': 'Climate',
+        'DEMOGRAPHIC': 'Demographic'
+    }
     input_colors = {
         'ALLCONDITIONS': 'grey',
         'ENVIRONMENTAL': 'skyblue',
@@ -279,7 +292,7 @@ def plot_from_measures_level():
                 expected_string = f"{filename.split('.csv')[0]}_{pred_col}_vs_{true_col}"
                 if expected_string == index:
                     for input_ in inputs:
-                        colname = f"{input_}aggregated_outputs_correlation"
+                        colname = f"{input_}_waves_correlation"
                         value = df.loc[index, colname]
                         if not pd.isna(value):
                             data[info['cat']][input_].append(value)
@@ -307,13 +320,15 @@ def plot_from_measures_level():
     fig, ax = plt.subplots(figsize=(10, 6))
 
     for idx, input_ in enumerate(inputs):
+        
         bar = ax.bar(x + idx * width - width,
-                     [means[cat][idx] for cat in categories.keys()],
-                     width,
-                     yerr=[errors[cat][idx] for cat in categories.keys()],
-                     label=input_,
-                     color=input_colors[input_],
-                     capsize=5)
+                [means[cat][idx] for cat in categories.keys()],
+                width,
+                yerr=[errors[cat][idx] for cat in categories.keys()],
+                label=label_map.get(input_, input_),
+                color=input_colors[input_],
+                capsize=5)
+
 
     # Labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Average Correlation')
@@ -328,6 +343,6 @@ def plot_from_measures_level():
 
 
 if __name__ == '__main__':
-    #plot_from_person_level_data()
-    plot_from_measures_level()
+    plot_from_person_level_data()
+    #plot_from_measures_level()
 
