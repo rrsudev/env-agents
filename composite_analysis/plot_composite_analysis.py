@@ -79,10 +79,10 @@ def plot_from_person_level_data():
     # Set labels and title
     ax.set_xlabel('Measure Categories')
     ax.set_ylabel('Average Correlation')
-    ax.set_title('Average Correlation by Input Type and Category')
+    ax.set_title('Individual-Level Average Correlation by Input Type and Category')
     ax.set_xticks(index)
     ax.set_xticklabels(category_labels)
-    ax.legend(title='Agent Type')
+    ax.legend(title='Agent Type', loc='lower left')
 
     plt.tight_layout()
     plt.show()
@@ -278,7 +278,7 @@ def plot_from_measures_level():
 
     # Categories mapping
     #categories = {'env': 'Environmental', 'soc': 'Social', 'ind': 'Individual'}
-    categories = {'env': 'Environmental', 'ind': 'Social and Individual'}
+    categories = {'env': 'Climate', 'ind': 'Individual Difference'}
 
     # Initialize storage for each (category, input)
     data = {cat: {input_: [] for input_ in inputs} for cat in categories.keys()}
@@ -332,17 +332,17 @@ def plot_from_measures_level():
 
     # Labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Average Correlation')
-    ax.set_xlabel('Question Categories')
-    ax.set_title('Average Correlation by Input Type and Category')
+    ax.set_xlabel('Measure Categories')
+    ax.set_title('Measure-Level Average Correlation by Input Type and Category')
     ax.set_xticks(x)
     ax.set_xticklabels([categories[cat] for cat in categories.keys()])
-    ax.legend(title='Input')
+    ax.legend(title='Agent Type', loc='lower left')
 
     plt.tight_layout()
     plt.show()
 
 
 if __name__ == '__main__':
-    plot_from_person_level_data()
-    #plot_from_measures_level()
+    #plot_from_person_level_data()
+    plot_from_measures_level()
 

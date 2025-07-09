@@ -140,24 +140,24 @@ measures = {
             {"pred": "CNS_Composite_Pred", "w2": "CNS_Composite_W2", "true": "CNS_Composite_W1"}
         ]
     },
-    # "ecdc_output.csv": {
-    #     "cat": "env",
-    #     "cols": [
-    #         {"pred": "Collective_Pred", "w2": "Collective_W2", "true": "Collective_W1"},
-    #         {"pred": "Indiv_Pred", "w2": "Indiv_W2", "true": "Indiv_W1"}
-    #     ]
-    # },
-    # "envefficacy_match.csv": {
-    #     "cat": "env",
-    #     "cols": [
-    #         {"pred": "Eff_Indiv_Pred", "w2": "Eff_Indiv_W2", "true": "Eff_Indiv_W1"},
-    #         {"pred": "Eff_Collective_Pred", "w2": "Eff_Collective_W2" , "true": "Eff_Collective_W1"}
-    #     ]
-    # },
-    # "envactions_output.csv": {
-    #     "cat": "env",
-    #     "cols": [{"pred": "ENV_Actions_Composite_Pred", "true": "ENV_Actions_Composite_Truth"}]
-    # }, # not a scale or sum
+    "ecdc_output.csv": {
+        "cat": "env",
+        "cols": [
+            {"pred": "Collective_Pred", "w2": "Collective_W2", "true": "Collective_W1"},
+            {"pred": "Indiv_Pred", "w2": "Indiv_W2", "true": "Indiv_W1"}
+        ]
+    },
+    "envefficacy_match.csv": {
+        "cat": "env",
+        "cols": [
+            {"pred": "Eff_Indiv_Pred", "w2": "Eff_Indiv_W2", "true": "Eff_Indiv_W1"},
+         {"pred": "Eff_Collective_Pred", "w2": "Eff_Collective_W2" , "true": "Eff_Collective_W1"}
+        ]
+    },
+    "envactions_output.csv": {
+        "cat": "env",
+        "cols": [{"pred": "ENV_Actions_Composite_Pred", "w2":"ENV_ACTIONS_Composite_W2", "true": "ENV_Actions_Composite_W1"}]
+    }, # not a scale or sum
     # "envemotions_output.csv": {
     #     "cat": "env",
     #     "cols": [{"pred": , "true": }]
@@ -214,7 +214,7 @@ measures = {
         ]
     },
     "trust_composite_output.csv": {
-        "cat": "ind",
+        "cat": "env",
         "cols": [
             {"pred": "Trust_Composite_Pred", "w2": "Trust_Composite_W2", "true": "Trust_Composite_W1"}
         ]
@@ -361,7 +361,7 @@ def main():
     print("Done! Output saved to composite_outcomes_correlations.csv")
 
 
-def person_analysis():
+def person_analysis_orig():
     # This will collect results like: {Email: {directory_cat_correlation: value, directory_cat_pval: value, ...}}
     email_data = {}
 
@@ -432,10 +432,18 @@ def person_analysis():
                     continue
                     # Need at least 2 points for correlation
                     # corr, pval = (float('nan'), float('nan'))
+                    
                 else:
                     corr, pval = pearsonr(preds, trues)
                     w2_corr, w2_pval = pearsonr(w2s, trues)
-                    corr = corr / w2_corr
+
+                    print("Interview-based prediction:", preds)
+                    print("Wave 1:", trues)
+                    print("Wave 2:", w2s)
+
+                    # print(pearsonr(preds, w2s))
+                    # print("corr: ", corr, " | ", "w2_corr: ", w2_corr)
+                    # corr = corr / w2_corr
                     # if cat == "ind":
                     #     print("Length of Preds: ", len(preds))
                     #     print("Length of Trues: ", len(trues))
@@ -456,6 +464,7 @@ def person_analysis():
     final_pivot_df.to_csv("composite_outcomes_person_level_correlations_pivoted.csv", index=False)
 
     print("Done! Output saved to composite_outcomes_person_level_correlations_pivoted.csv")
+
 
 
 # def compile_all_composites_one_csv():
@@ -502,6 +511,85 @@ def person_analysis():
 #             print(f"{path}\nSize after merge: {merged_df.shape}")
 #
 #     merged_df.to_csv("compiled_output.csv", index=False)
+
+
+def person_analysis():
+    email_data = {}
+    debug_lines = []
+
+    for directory in directories:
+        person_cat_data = {}
+
+        for measure_file, measure_info in measures.items():
+            path = os.path.join('Composite_Outcomes', directory, measure_file)
+
+            if not os.path.exists(path):
+                continue
+
+            df = pd.read_csv(path)
+
+            if 'Email' not in df.columns:
+                continue
+
+            cat = measure_info["cat"]
+
+            for _, row in df.iterrows():
+                email = row['Email']
+                if pd.isna(email):
+                    continue
+
+                if email not in person_cat_data:
+                    person_cat_data[email] = {}
+                if cat not in person_cat_data[email]:
+                    person_cat_data[email][cat] = {'pred': [], 'true': [], 'w2': []}
+
+                for col_pair in measure_info["cols"]:
+                    pred_col = col_pair["pred"]
+                    true_col = col_pair["true"]
+                    w2_col = col_pair["w2"]
+
+                    if pred_col not in df.columns or true_col not in df.columns or w2_col not in df.columns:
+                        continue
+
+                    pred_val = row[pred_col]
+                    true_val = row[true_col]
+                    w2_val = row[w2_col]
+
+                    if pd.isna(pred_val) or pd.isna(true_val) or pd.isna(w2_val):
+                        continue
+
+                    person_cat_data[email][cat]['pred'].append(pred_val)
+                    person_cat_data[email][cat]['true'].append(true_val)
+                    person_cat_data[email][cat]['w2'].append(w2_val)
+
+        for email, cat_data in person_cat_data.items():
+            if email not in email_data:
+                email_data[email] = {}
+
+            for cat, values in cat_data.items():
+                preds = values['pred']
+                trues = values['true']
+                w2s = values['w2']
+
+                if len(preds) < 2 or len(trues) < 2 or len(w2s) < 2:
+                    continue
+
+                corr, pval = pearsonr(preds, trues)
+                w2_corr, w2_pval = pearsonr(w2s, trues)
+
+                # Log to file instead of printing
+
+                col_corr = f"{directory}_{cat}_correlation"
+                col_pval = f"{directory}_{cat}_pval"
+
+                email_data[email][col_corr] = corr
+                email_data[email][col_pval] = pval
+
+    final_pivot_df = pd.DataFrame.from_dict(email_data, orient='index').reset_index()
+    final_pivot_df = final_pivot_df.rename(columns={'index': 'Email'})
+    final_pivot_df.to_csv("composite_outcomes_person_level_correlations_pivoted.csv", index=False)
+
+    print("Done! Output saved to composite_outcomes_person_level_correlations_pivoted.csv")
 
 
 if __name__ == '__main__':
