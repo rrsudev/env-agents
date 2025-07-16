@@ -151,7 +151,7 @@ def run_simulation(platform, climate_interview, demographic, AVP):
 
 def test():
     questions = csv_to_list_of_dicts("../master_questions.csv")
-    agent = "weedprincess1985@gmail.com"
+    agent = "test@email.com"
     q_set_1 = []
     q_set_2 = []
     for i in range(len(questions)):
