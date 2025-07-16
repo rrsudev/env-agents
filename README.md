@@ -18,9 +18,22 @@ We clean the ground truth information and separate our simulated data into two w
 
 `make_test_retest_csv`: combine and restructure JSON files of simulated agent outputs into a csv file for comparison with ground truth data. 
 
+#### 0.3: Data Release
+`0_data_release` contains `data_release.zip`, where you can find anonymized pilot data for both human ground truth and simulated responses.
 
 ## STEP 1: Measure-Level Analysis
-`all_measures.py `: Analyze data for each of the climate and individual difference measures used. Output csv files showing Wave 1 (W1), Wave 2 (W2) and predicted values for each measure, including subscales where applicable. Calculate composites for scales, per respondent. Below is a summary of all measures covered.
+`all_measures.py` : Analyze data for each of the climate and individual difference measures used. Output csv files showing Wave 1 (W1), Wave 2 (W2) and predicted values for each measure, including subscales where applicable. Calculate composites for scales, per respondent. 
+
+To proceed with our pipeline, ensure you run all measures across each of the four conditions. You would need to run something to the effect of:
+
+```
+  all_measures.py all --agent ALLCONDITIONS
+  all_measures.py all --agent AMERICANVOICES
+  all_measures.py all --agent DEMOGRAPHIC
+  all_measures.py all --agent ENVIRONMENTAL
+```
+
+Below is a summary of all measures covered.
 
 | Category             | Measure (name in paper)                                | Pipeline function         | Output CSV                        |
 |----------------------|--------------------------------------------------------|----------------------------|-----------------------------------|
@@ -45,16 +58,12 @@ We clean the ground truth information and separate our simulated data into two w
 
 
 ## STEP 2: Calculate and Plot Normalized Correlations
-### Composite Metrics
-- Take the correlation for each composite measure given each input type
-- Plot the average correlation for composites in each category (along with confidence interval)
+`composite_analysis.py` takes the output of `all_measures.py` and conducts measure level and individual level analysis. 
+`plot_composite_analysis.py` can be used to visualize the output of `composite_analysis.py`.
+### Measure Level
+- Takes the correlation for each composite measure given each input type
+- Plots the average correlation for composites in each category (along with confidence interval)
 
-### Respondent Level
-- Take the data points for one participant in a given category and calculate the correlation for that specific participant in that specific category
-- Plot the average participant-level correlation coefficient for each question category and input type
-
-
-## Future Steps
-- Possible refactoring of measure level analysis
-- Normalized accuracy for non-scales
-- Calculate cronbach’s alpha
+### Individual Level
+- Takes the data points for one participant in a given category and calculate the correlation for that specific participant in that specific category
+- Plots the average participant-level correlation coefficient for each question category and input type
