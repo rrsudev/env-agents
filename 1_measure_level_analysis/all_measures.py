@@ -38,13 +38,13 @@ import numpy as np
 # ---------------------------------------------------------------------
 # GLOBAL CONFIG 
 # ---------------------------------------------------------------------
-# !!! Make sure these are accurate to your file structure
+# !!! TO THE USER: Make sure these are accurate to your own file structure
 DATA_W1         = "groundtruth_data/w1_groundtruth.csv"
 DATA_W2         = "groundtruth_data/w2_groundtruth.csv"
 DATA_PRED       = "simulated_data/simulated_allcond.csv",
 
 # pathways for agent conditions
-# !!! Make sure these are accurate to your file structure
+# !!! TO THE USER: Make sure these are accurate to your own file structure
 PRED_FILES = {
     "ALLCONDITIONS":        "simulated_data/simulated_allcond.csv",
     "AMERICANVOICES":       "simulated_data/simulated_americanvoices.csv",
@@ -53,20 +53,9 @@ PRED_FILES = {
 }
 
 
-# ---------------------------------------------------------------------
-# --------------  HELPERS  --------------------------------------------
-# ---------------------------------------------------------------------
 def standardize_email(df: pd.DataFrame) -> pd.DataFrame:
     df["Email"] = df["Email"].astype(str).str.lower().str.strip()
     return df
-
-def fisher_z(r: float) -> float:
-    if abs(r) >= 1:          # avoid infinite values
-        return np.nan
-    return 0.5 * np.log((1 + r) / (1 - r))
-
-def inv_fisher_z(z: float) -> float:
-    return np.tanh(z)
 
 # ---------------------------------------------------------------------
 # --------------  MEASURE PIPELINES  ----------------------------------
@@ -682,23 +671,10 @@ def run_trust(outdir: str) -> str:
 # --------------  ENVIRONMENTAL EMOTIONS    ---------------------------
 # ---------------------------------------------------------------------
 def run_emotions(outdir: str) -> str:
-    """
-    Fisher-z transformed composite of 14 binary-coded emotions.
-    """
     emotion_cols = [f"Emotions_{i}" for i in range(1, 15)]
 
     def encode(row, cols):
         return [1.0 if row[c] == "yes" else 0.0 if row[c] == "no" else np.nan for c in cols]
-
-    def safe_corr(a, b):
-        mask = ~np.isnan(a) & ~np.isnan(b)
-        if np.sum(mask) < 3:
-            return np.nan
-        x, y = a[mask], b[mask]
-        if np.std(x) == 0 or np.std(y) == 0:   # no variance
-            return np.nan
-        return np.corrcoef(x, y)[0, 1]
-
 
     df_w1 = standardize_email(pd.read_csv(DATA_W1))
     df_w2 = standardize_email(pd.read_csv(DATA_W2))
@@ -722,17 +698,23 @@ def run_emotions(outdir: str) -> str:
         v2 = np.array(encode(row, [f"{c}_W2" for c in emotion_cols]), dtype=np.float64)
         vp = np.array(encode(row, emotion_cols), dtype=np.float64)
 
+        def safe_mean(x):
+            return np.nan if np.isnan(x).all() else np.nanmean(x)
+
         records.append({
             "Email": email,
-            "Envemotions_Composite_W1": round(safe_corr(v1, v1), 3),
-            "Envemotions_Composite_W2": round(safe_corr(v1, v2), 3),
-            "Envemotions_Composite_Pred": round(safe_corr(v1, vp), 3)
+            "Envemotions_Composite_W1": round(safe_mean(v1), 3),
+            "Envemotions_Composite_W2": round(safe_mean(v2), 3),
+            "Envemotions_Composite_Pred": round(safe_mean(vp), 3)
         })
 
     out_df = pd.DataFrame(records)
     out_path = os.path.join(outdir, "emotions_output.csv")
     out_df.to_csv(out_path, index=False)
     return f"EMOTIONS → rows:{len(out_df)}"
+
+
+
 
 
 # ---------------------------------------------------------------------
@@ -842,7 +824,7 @@ def main():
 
     parser.add_argument(
         "--outdir",
-        default=None,  # <-- Change this from OUTPUT_DIR to None
+        default=None, 
         help="Where to write output csvs (default: ./Composite_Outcomes/{AGENT}_waves)"
     )
 
@@ -856,7 +838,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Set DATA_PRED globally
     global DATA_PRED
     DATA_PRED = PRED_FILES[args.agent]
 
@@ -879,7 +860,6 @@ def main():
     if unknown:
         sys.exit(f"Unknown measure(s): {', '.join(unknown)}")
 
-    # Run each selected measure
     for m in targets:
         print(f"→ Running {m} …")
         print("   ", MEASURE_FUNCS[m](outdir))
