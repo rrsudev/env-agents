@@ -5,6 +5,10 @@ import seaborn as sns
 from scipy.stats import norm
 
 
+
+# -----------------------------------------------------------------
+# --------------  NORMALIZED CORRELATION PLOTS  -------------------
+# -----------------------------------------------------------------
 def plot_from_person_level_data():
     # Read the CSV
     df = pd.read_csv('composite_outcomes_person_level_correlations.csv')
@@ -280,8 +284,178 @@ def plot_from_measures_level():
     plt.show()
 
 
+# -----------------------------------------------------------------
+# --------------  RAW CORRELATION PLOTS         -------------------
+# -----------------------------------------------------------------
+
+def plot_raw_person():
+    df = pd.read_csv('composite_outcomes_person_raw_correlations.csv')
+
+    inputs = ['ALLCONDITIONS', 'ENVIRONMENTAL', 'AMERICANVOICES', 'DEMOGRAPHIC']
+    label_map = {
+        'ALLCONDITIONS': 'Combined',
+        'AMERICANVOICES': 'American Voices Project',
+        'ENVIRONMENTAL': 'Climate',
+        'DEMOGRAPHIC': 'Demographic'
+    }
+    colors = {
+        'ALLCONDITIONS': 'grey',
+        'ENVIRONMENTAL': 'skyblue',
+        'AMERICANVOICES': 'salmon',
+        'DEMOGRAPHIC': 'lightgreen'
+    }
+
+    categories = ['env', 'ind']
+    category_labels = ['Climate', 'Individual Difference']
+
+    all_labels = []
+    pred_means = []
+    pred_sems = []
+    w2_means = []
+    w2_sems = []
+    bar_colors = []
+    hatches = []
+    cat_separators = []
+
+    for cat in categories:
+        for input_ in inputs:
+            filtered = df[(df['agent'] == input_ + '_waves') & (df['category'] == cat)]
+            pred_vals = filtered['r_pred_clamped'].dropna()
+            w2_vals = filtered['r_w2_clamped'].dropna()
+
+            pred_means.append(pred_vals.mean())
+            pred_sems.append(pred_vals.sem())
+            w2_means.append(w2_vals.mean())
+            w2_sems.append(w2_vals.sem())
+
+            all_labels.append(f"{label_map[input_]} (Pred)")
+            bar_colors.append(colors[input_])
+            hatches.append("")
+            cat_separators.append(cat)
+
+            all_labels.append(f"{label_map[input_]} (W2)")
+            bar_colors.append(colors[input_])
+            hatches.append("//")
+            cat_separators.append(cat)
+
+    x = np.arange(len(all_labels))
+    fig, ax = plt.subplots(figsize=(16, 6))
+
+    for i in range(len(x)):
+        mean_val = pred_means[i // 2] if 'Pred' in all_labels[i] else w2_means[i // 2]
+        sem_val = pred_sems[i // 2] if 'Pred' in all_labels[i] else w2_sems[i // 2]
+
+        ax.bar(x[i], mean_val, yerr=sem_val, width=0.8,
+               color=bar_colors[i], hatch=hatches[i], label=all_labels[i] if i < 8 else "", capsize=4)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(all_labels, rotation=45, ha='right')
+    ax.set_ylabel('Average Correlation')
+    ax.set_title('Raw Person-Level Correlations (Predicted vs W2)')
+    ax.legend(loc='lower left', fontsize='small', title='Agent Type', ncol=2)
+
+    # Vertical separator between categories
+    mid_point = len(x) // 2
+    ax.axvline(x[mid_point] - 0.5, color='black', linestyle='--', linewidth=1)
+
+    ax.text(mid_point / 2, ax.get_ylim()[1] * 0.95, "Climate", ha='center', fontsize=12, weight='bold')
+    ax.text((mid_point + len(x)) / 2, ax.get_ylim()[1] * 0.95, "Individual Difference", ha='center', fontsize=12, weight='bold')
+
+    plt.tight_layout()
+    plt.show()
+
+
+
+def plot_raw_measures():
+    df = pd.read_csv('composite_outcomes_measure_raw_correlations.csv')
+
+    measures_config = {
+        "adaptation_mitigation_output.csv": "env", "cns_output.csv": "env", "ecdc_output.csv": "env",
+        "envefficacy_match.csv": "env", "envactions_output.csv": "env", "gses_output.csv": "ind",
+        "gsjs_output.csv": "ind", "iri_output.csv": "ind", "mfq_output.csv": "ind", "nep_output.csv": "env",
+        "nfc_output.csv": "ind", "proximity_output.csv": "env", "risk_aversion_output.csv": "ind",
+        "trust_output.csv": "env", "sdo_output.csv": "ind", "mes_composite_output.csv": "ind",
+        "emotions_output.csv": "env"
+    }
+
+    inputs = ['ALLCONDITIONS', 'ENVIRONMENTAL', 'AMERICANVOICES', 'DEMOGRAPHIC']
+    label_map = {
+        'ALLCONDITIONS': 'Combined',
+        'AMERICANVOICES': 'American Voices Project',
+        'ENVIRONMENTAL': 'Climate',
+        'DEMOGRAPHIC': 'Demographic'
+    }
+    colors = {
+        'ALLCONDITIONS': 'grey',
+        'ENVIRONMENTAL': 'skyblue',
+        'AMERICANVOICES': 'salmon',
+        'DEMOGRAPHIC': 'lightgreen'
+    }
+
+    categories = {'env': 'Climate', 'ind': 'Individual Difference'}
+    cat_keys = list(categories.keys())
+
+    all_labels = []
+    pred_means = []
+    pred_sems = []
+    w2_means = []
+    w2_sems = []
+    bar_colors = []
+    hatches = []
+    cat_separators = []
+
+    for c_idx, cat in enumerate(cat_keys):
+        for input_ in inputs:
+            filtered = df[(df['agent'] == input_ + '_waves') &
+                          (df['measure_file'].map(measures_config.get) == cat)]
+
+            pred_vals = filtered['r_pred_clamped'].dropna()
+            w2_vals = filtered['r_w2_clamped'].dropna()
+
+            pred_means.append(pred_vals.mean())
+            pred_sems.append(pred_vals.sem())
+            w2_means.append(w2_vals.mean())
+            w2_sems.append(w2_vals.sem())
+
+            all_labels.append(f"{label_map[input_]} (Pred)")
+            bar_colors.append(colors[input_])
+            hatches.append("")
+            cat_separators.append(categories[cat])
+
+            all_labels.append(f"{label_map[input_]} (W2)")
+            bar_colors.append(colors[input_])
+            hatches.append("//")
+            cat_separators.append(categories[cat])
+
+    x = np.arange(len(all_labels))  # bar positions
+    fig, ax = plt.subplots(figsize=(16, 6))
+
+    for i in range(len(x)):
+        mean_val = pred_means[i // 2] if 'Pred' in all_labels[i] else w2_means[i // 2]
+        sem_val = pred_sems[i // 2] if 'Pred' in all_labels[i] else w2_sems[i // 2]
+
+        ax.bar(x[i], mean_val, yerr=sem_val, width=0.8,
+               color=bar_colors[i], hatch=hatches[i], label=all_labels[i] if i < 8 else "", capsize=4)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(all_labels, rotation=45, ha='right')
+    ax.set_ylabel('Average Correlation')
+    ax.set_title('Raw Measure-Level Correlations (Predicted vs W2)')
+    ax.legend(loc='lower left', fontsize='small', title='Agent Type', ncol=2)
+
+    # Vertical separator between categories
+    mid_point = len(x) // 2
+    ax.axvline(x[mid_point] - 0.5, color='black', linestyle='--', linewidth=1)
+
+    ax.text(mid_point / 2, ax.get_ylim()[1] * 0.95, "Climate", ha='center', fontsize=12, weight='bold')
+    ax.text((mid_point + len(x)) / 2, ax.get_ylim()[1] * 0.95, "Individual Difference", ha='center', fontsize=12, weight='bold')
+
+    plt.tight_layout()
+    plt.show()
+
+
 if __name__ == '__main__':
     plot_from_measures_level()
     plot_from_person_level_data()
-
-
+    plot_raw_person()
+    plot_raw_measures()
