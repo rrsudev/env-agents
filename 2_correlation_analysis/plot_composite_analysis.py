@@ -80,8 +80,8 @@ def plot_from_person_level_data():
 
     # Set labels and title
     ax.set_xlabel('Measure Categories')
-    ax.set_ylabel('Average Correlation')
-    ax.set_title('Individual-Level Average Correlation by Input Type and Category')
+    ax.set_ylabel('Normalized Correlation')
+    ax.set_title('Individual-Level Normalized Correlation by Input Type and Category')
     ax.set_xticks(index)
     ax.set_xticklabels(category_labels)
     ax.legend(title='Agent Type', loc='lower left')
@@ -273,9 +273,9 @@ def plot_from_measures_level():
 
 
     # Labels, title and custom x-axis tick labels, etc.
-    ax.set_ylabel('Average Correlation')
+    ax.set_ylabel('Normalized Correlation')
     ax.set_xlabel('Measure Categories')
-    ax.set_title('Measure-Level Average Correlation by Input Type and Category')
+    ax.set_title('Measure-Level Normalized Correlation by Input Type and Category')
     ax.set_xticks(x)
     ax.set_xticklabels([categories[cat] for cat in categories.keys()])
     ax.legend(title='Agent Type', loc='lower left')
