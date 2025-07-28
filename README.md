@@ -14,9 +14,9 @@ Agents are constructed from interview transcripts and all responses are stored i
 #### 0.2: Cleaning Raw Data
 We clean the ground truth information and separate our simulated data into two waves before processing.
 
-`make_simulated_csv`: clean the ground truth data exported from the Qualtrics survey for use in later analysis.
+`make_test_retest_csv`: clean the ground truth data exported from the Qualtrics survey for use in later analysis.
 
-`make_test_retest_csv`: combine and restructure JSON files of simulated agent outputs into a csv file for comparison with ground truth data. 
+`make_simulated_csv`: combine and restructure JSON files of simulated agent outputs into a csv file for comparison with ground truth data. 
 
 #### 0.3: Data Release
 `0_data_release` contains `data_release.zip`, where you can find anonymized pilot data for both human ground truth and simulated responses.
