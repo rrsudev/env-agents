@@ -49,7 +49,7 @@ PRED_FILES = {
     "ALLCONDITIONS":        "simulated_data/simulated_allcond.csv",
     "AMERICANVOICES":       "simulated_data/simulated_americanvoices.csv",
     "DEMOGRAPHIC":          "simulated_data/simulated_demographic.csv",
-    "ENVIRONMENTAL":        "simulated_data/simulated_allcond.csv",
+    "ENVIRONMENTAL":        "simulated_data/simulated_environment.csv",
 }
 
 
