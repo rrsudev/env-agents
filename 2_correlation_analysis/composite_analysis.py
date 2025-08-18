@@ -184,6 +184,8 @@ def main():
                 if key not in results:
                     results[key] = {}
 
+                if pd.isna(corr) or pd.isna(w2_corr) or abs(w2_corr) < 1e-6:
+                    continue
                 norm_corr = corr/w2_corr
 
                 results[key][f"{directory}_correlation"] = norm_corr
@@ -250,6 +252,8 @@ def person_analysis():
                 col_norm = f"{directory}_{cat}_normalized"
 
                 email_data[email][col_corr] = corr
+                if pd.isna(corr) or pd.isna(w2_corr) or abs(w2_corr) < 1e-6:
+                    continue
                 norm_corr = corr/w2_corr
 
                 email_data[email][col_norm] = norm_corr
