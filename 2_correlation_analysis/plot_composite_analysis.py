@@ -6,6 +6,46 @@ from scipy.stats import norm
 
 
 
+# ------------------------ Fisher-z utilities ------------------------
+def _fisher_z_mean_and_sem(correlation_values):
+    """Compute Fisher-z averaged mean and SEM for a list/Series of correlations.
+
+    - clips correlations to (-1 + eps, 1 - eps) to avoid infinities
+    - averages in z-space,
+    - back-transforms the mean to r
+    - propagates the standard error via the derivative of tanh at the mean.
+    """
+    if correlation_values is None:
+        return np.nan, np.nan
+
+    values_array = np.asarray(correlation_values, dtype=float)
+    values_array = values_array[~np.isnan(values_array)]
+
+    if values_array.size == 0:
+        return np.nan, np.nan
+
+    # Clip to avoid +/-1 which makes arctanh infinite
+    epsilon = 1e-8
+    clipped_values = np.clip(values_array, -1.0 + epsilon, 1.0 - epsilon)
+
+    z_values = np.arctanh(clipped_values)
+    mean_z = np.mean(z_values)
+    mean_r = np.tanh(mean_z)
+
+    n = z_values.size
+    if n > 1:
+        sem_z = np.std(z_values, ddof=1) / np.sqrt(n)
+    else:
+        sem_z = np.nan
+
+    # Propagate SEM back to r-space via derivative dr/dz = 1 - tanh(z)^2
+    if np.isnan(sem_z):
+        sem_r = np.nan
+    else:
+        sem_r = sem_z * (1.0 - mean_r ** 2)
+
+    return mean_r, sem_r
+
 # -----------------------------------------------------------------
 # --------------  NORMALIZED CORRELATION PLOTS  -------------------
 # -----------------------------------------------------------------
@@ -42,8 +82,7 @@ def plot_from_person_level_data():
             column_name = f'{input_type}_waves_{category}_correlation'
             if column_name in df.columns:
                 values = df[column_name].dropna()
-                mean = values.mean()
-                sem = values.sem()  # Standard Error of the Mean
+                mean, sem = _fisher_z_mean_and_sem(values)
                 bar_means.append(mean)
                 bar_errors.append(sem)
             else:
@@ -247,14 +286,14 @@ def plot_from_measures_level():
         for input_ in inputs:
             values = data[cat][input_]
             if values:
-                mean = np.mean(values)
-                error = np.std(values, ddof=1) / np.sqrt(len(values))  # Standard error
+                mean, error = _fisher_z_mean_and_sem(values)
             else:
                 mean = np.nan
                 error = np.nan
             means[cat].append(mean)
             errors[cat].append(error)
 
+    print(len(data['ind']['AMERICANVOICES']))
     # Plotting
     x = np.arange(len(categories))  # the label locations
     width = 0.2  # the width of the bars
@@ -323,10 +362,13 @@ def plot_raw_person():
             pred_vals = filtered['r_pred_clamped'].dropna()
             w2_vals = filtered['r_w2_clamped'].dropna()
 
-            pred_means.append(pred_vals.mean())
-            pred_sems.append(pred_vals.sem())
-            w2_means.append(w2_vals.mean())
-            w2_sems.append(w2_vals.sem())
+            pred_mean, pred_sem = _fisher_z_mean_and_sem(pred_vals)
+            w2_mean, w2_sem = _fisher_z_mean_and_sem(w2_vals)
+
+            pred_means.append(pred_mean)
+            pred_sems.append(pred_sem)
+            w2_means.append(w2_mean)
+            w2_sems.append(w2_sem)
 
             all_labels.append(f"{label_map[input_]} (Pred)")
             bar_colors.append(colors[input_])
@@ -412,10 +454,13 @@ def plot_raw_measures():
             pred_vals = filtered['r_pred_clamped'].dropna()
             w2_vals = filtered['r_w2_clamped'].dropna()
 
-            pred_means.append(pred_vals.mean())
-            pred_sems.append(pred_vals.sem())
-            w2_means.append(w2_vals.mean())
-            w2_sems.append(w2_vals.sem())
+            pred_mean, pred_sem = _fisher_z_mean_and_sem(pred_vals)
+            w2_mean, w2_sem = _fisher_z_mean_and_sem(w2_vals)
+
+            pred_means.append(pred_mean)
+            pred_sems.append(pred_sem)
+            w2_means.append(w2_mean)
+            w2_sems.append(w2_sem)
 
             all_labels.append(f"{label_map[input_]} (Pred)")
             bar_colors.append(colors[input_])
