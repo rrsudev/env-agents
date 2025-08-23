@@ -41,11 +41,13 @@ Below is a summary of all measures covered.
 |                      | Adaptation and Mitigation Behavioral Intentions        | `run_adaptation_mitigation`| `adaptation_mitigation_output.csv`|
 |                      | Connectedness to Nature Scale                          | `run_cns`                  | `cns_output.csv`                  |
 |                      | Environmental Efficacy                                 | `run_envefficacy`          | `envefficacy_match.csv`           |
-|                      | Relative Carbon Mitigation Impact                      | *(pipeline TBD)*           | *(csv TBD)*                       |
+|                      | Relative Carbon Mitigation Impact                      | *(not collected in pilot)* | *(not collected in pilot)*        |
 |                      | Psychological Proximity of Climate Change              | `run_proximity`            | `proximity_output.csv`            |
 |                      | Climate Behavioral Adoption Likelihood                 | `run_envactions`           | `envactions_output.csv `          |
 |                      | Climate Emotions                                       | `run_emotions`             | `emotions_output.csv`             |
 |                      | Trust in Science and Climate Scientists                | `run_trust`                | `trust_output.csv`                |
+|                      | Support for company-led climate change mitigation      | *(not collected in pilot)* | *(not collected in pilot)*        |
+|                      | Support for Specific Mitigation Policies               | *(not collected in pilot)* | *(not collected in pilot)*        |
 | **Individual Difference** | Risk Aversion                                     | `run_risk_aversion`        | `risk_aversion_output.csv`        |
 |                      | General Self-Efficacy Scale                            | `run_gses`                 | `gses_output.csv`                 |
 |                      | Moral Foundations Questionnaire                        | `run_mfq`                  | `mfq_output.csv`                  |
