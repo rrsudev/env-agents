@@ -19,13 +19,6 @@ measures = {
             {"pred": "CNS_Composite_Pred", "w2": "CNS_Composite_W2", "true": "CNS_Composite_W1"}
         ]
     },
-    "ecdc_output.csv": {
-        "cat": "env",
-        "cols": [
-            {"pred": "Collective_Pred", "w2": "Collective_W2", "true": "Collective_W1"},
-            {"pred": "Indiv_Pred", "w2": "Indiv_W2", "true": "Indiv_W1"}
-        ]
-    },
     "envefficacy_match.csv": {
         "cat": "env",
         "cols": [
