@@ -144,13 +144,6 @@ def plot_from_measures_level():
                 {"pred": "CNS_Composite_Pred", "w2": "CNS_Composite_W2", "true": "CNS_Composite_W1"}
             ]
         },
-        "ecdc_output.csv": {
-            "cat": "env",
-            "cols": [
-                {"pred": "Collective_Pred", "w2": "Collective_W2", "true": "Collective_W1"},
-                {"pred": "Indiv_Pred", "w2": "Indiv_W2", "true": "Indiv_W1"}
-            ]
-        },
         "envefficacy_match.csv": {
             "cat": "env",
             "cols": [
@@ -412,7 +405,7 @@ def plot_raw_measures():
     df = pd.read_csv('composite_outcomes_measure_raw_correlations.csv')
 
     measures_config = {
-        "adaptation_mitigation_output.csv": "env", "cns_output.csv": "env", "ecdc_output.csv": "env",
+        "adaptation_mitigation_output.csv": "env", "cns_output.csv": "env", 
         "envefficacy_match.csv": "env", "envactions_output.csv": "env", "gses_output.csv": "ind",
         "gsjs_output.csv": "ind", "iri_output.csv": "ind", "mfq_output.csv": "ind", "nep_output.csv": "env",
         "nfc_output.csv": "ind", "proximity_output.csv": "env", "risk_aversion_output.csv": "ind",
