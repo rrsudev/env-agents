@@ -107,6 +107,8 @@ measures = {
     },
 }
 
+# additional measures will be added above for full data collection
+
 directories = ["AMERICANVOICES_waves", "DEMOGRAPHIC_waves", "ENVIRONMENTAL_waves", "ALLCONDITIONS_waves"]
 
 # ---------------------------------------------------------------------
