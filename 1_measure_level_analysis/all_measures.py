@@ -57,6 +57,10 @@ def standardize_email(df: pd.DataFrame) -> pd.DataFrame:
     df["Email"] = df["Email"].astype(str).str.lower().str.strip()
     return df
 
+def standardize_email(df: pd.DataFrame) -> pd.DataFrame:
+    df["Email"] = df["Email"].astype(str).str.lower().str.strip()
+    return df
+
 # ---------------------------------------------------------------------
 # --------------  MEASURE PIPELINES  ----------------------------------
 # • Every measure-level function will:
@@ -785,9 +789,39 @@ def run_mes(outdir: str) -> str:
     return f"MES → rows:{len(merged)}"
 
 
+# ---------------------------------------------------------------------
+# --------------     ADDITIONAL MEASURES    ---------------------------
+# ---------------------------------------------------------------------
+
+# Additional measure-level functions will be added here
+# The selection above represents the measures used in the pilot
+def run_carbonmit():
+    """
+    Relative Carbon Mitigation Impact: 
+    we will compute a composite here during the full data collection process
+    """
+    pass 
+
+
+def run_comppolicy():
+    """
+    Support for company-led climate change mitigation: 
+    we will compute a composite here during the full data collection process
+    """
+    pass 
+
+
+def run_mitpolicy():
+    """
+    Support for Specific Mitigation Policies: 
+    we will compute a composite here during the full data collection process
+    """
+    pass 
+
 # -------------------------------------------------
 # EVERY MEASURE PIPELINE AND EQUIVALENT FUNCTION
 # map CLI-name  ->  function
+# additional functions will be added here
 # -------------------------------------------------
 MEASURE_FUNCS = {
     "envactions":             run_envactions,
@@ -813,6 +847,8 @@ MEASURE_FUNCS = {
 # -----------------------------------------------------------------
 # --------------  MAIN DISPATCHER  --------------------------------
 # -----------------------------------------------------------------
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run composite-score pipelines.")
 
